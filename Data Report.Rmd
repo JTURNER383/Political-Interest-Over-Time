@@ -1,0 +1,273 @@
+---
+title: "Does political interest remain stable over an individual's life course?"
+output: word_document
+---
+
+Introduction
+
+A nations political interest remains a significant factor to allow for a flourishing democracy. This is attributed to the fact that it is the most important indicator for political participation, after controlling for political resources (Brady et al., 1995). Furthermore, those who are politically interested are also more likely to participate in offline and online political events (Best and Krueger, 2005). Significantly, as the amount of people that take part in these events increases, it is more likely that the message from these will reach a wider audience. The factors mentioned above have contributed to a desire for theory associated with political interest.
+
+Firstly, it is important to highlight the level of political interest by age. This gives indications to voting turnouts for certain age groups and to which areas political campaigns should be aimed at. According to Neundord et al. (2013), individuals become more interested in politics as they grow older. This is attributed to two ideas, firstly, youths do not believe politics is relevant to their lives (van Deth, 1989). Secondly, young people are distracted by other aspects of life such as careers, relationships and leisure (Glenn and Grimes, 1968).
+
+When considering the stability of political interest during a life course, Sears (1983) proposed two theories which have been extensively debated in literature. The first of these is the ‘lifelong openness hypothesis’, which states that through an individual’s life, they are susceptible to change as a response to experiences (Sears, 1983). This theory implies that political interest should fluctuate over time (Russo and Stattin, 2016). On the other hand, the ‘lifelong persistence hypothesis’ presents an opposite picture. This hypothesis believes that political attitudes are opposed to change (Sears, 1983). As this area of academia has developed, it has been found that these two hypotheses are too broad, and they do not consider the various factors that could affect political interest.
+
+A factor that has been considered with the stability of political interest is the age of the individual. Previous research indicates that political interest is stable throughout adulthood, however, during adolescence there are more substantial changes (Neundorf et al., 2013). Despite this finding, there have been varied results when considering adolescent political stability. For example, Prior’s (2010) study followed the Bayesian learning model and impressionable year’s view. These theories insinuate that stability should increase over an individuals life and should only destabilise if the political system undergoes a significant change (Prior, 2010).
+
+Methods
+
+This paper will utilise the Understanding Society UK Household Longitudinal Society dataset, which is a longitudinal panel study that spans from 2009 to 2019. The data includes both individual and household level information. Data was constructed from the first seven waves of the study (2009 to 2017) to analyse the stability of political interest by age. The sample includes only the individuals who took part in all of the first seven waves. This was to ensure that the variation that was calculated was not hindered by individuals who participated in a limited number of waves. The criteria of participation was coupled with those who reported their level of political interest every year. This resulted in 16,906 individuals, each of which have seven results indicating their political interest for each year.
+
+The aim of this study is to construct two boxplots to determine the level of political interest, and the variation in political interest by age. It is expected that the Bayesian learning model and the impressionable years view predictions will be present in this analysis. The outcomes of this theory can be seen in the hypotheses that will be tested below.
+
+Hypotheses
+
+H0 - Political interest increases as age increases. 
+
+HA - Political interest does not increase as age increases.
+
+H0 - The stability of political interest will increase as age increases.
+
+HA - The stability of political interest will not increase as age increases.
+
+The Variables
+
+Within this study, three variables will be used to uncover the relationships described above. The first of these is the cross wave person identifier code (pidp), this is vital as it informs researchers which observation belongs to each individual. This variable allows for research considering individual characteristics across time to be conducted. The second variable used is the individual’s level of political interest (vote6). This is ordinal data with four responses of 1, 2, 3 or 4, which translates to “very interested”, “fairly interested”, “not very interested” and “not at all interested”, respectively. It is important to note that as this variable increases, the political interest decreases to avoid confusion in the interpretation of the data visualization. The final variable used is the age variable which is the individual’s age at the time of the interview. Due to seven interviews taking place there are seven different ages for each individual. The plots used the age at the first wave for various reasons that will be discussed later.  This was converted into a categorical variable which classified each individual into one of six age groups (age_group). Age was recoded to allow for boxplots to be formed which is the main mode of data visualization within this study. Boxplots is the best mode of data visualization for categorical or ordinal variables which is why it was selected for this study. The seven waves of panel data was manipulated and joined together to allow for the analysis which can be seen below.
+
+
+The Code
+
+
+Loading Packages
+
+```{r}
+library(panelr)
+library(tidyverse)
+library(naniar)
+```
+
+Loading Understanding Society Data
+
+
+```{r}
+w1 <- read_tsv("UKDA-6614-tab/tab/ukhls_w1/a_indresp.tab")
+w1 <- w1 %>%
+  select(pidp, a_vote6, a_age_dv)
+w2 <- read_tsv("UKDA-6614-tab/tab/ukhls_w2/b_indresp.tab")
+w2 <- w2 %>%
+  select(pidp, b_vote6, b_age_dv)
+w3 <- read_tsv("UKDA-6614-tab/tab/ukhls_w3/c_indresp.tab")
+w3 <- w3 %>%
+  select(pidp, c_vote6, c_age_dv)
+w4 <- read_tsv("UKDA-6614-tab/tab/ukhls_w4/d_indresp.tab")
+w4 <- w4 %>%
+  select(pidp, d_vote6, d_age_dv)
+w5 <- read_tsv("UKDA-6614-tab/tab/ukhls_w5/e_indresp.tab")
+w5 <- w5 %>%
+  select(pidp, e_vote6, e_age_dv)
+w6 <- read_tsv("UKDA-6614-tab/tab/ukhls_w6/f_indresp.tab")
+w6 <- w6 %>%
+  select(pidp, f_vote6, f_age_dv)
+w7 <- read_tsv("UKDA-6614-tab/tab/ukhls_w7/g_indresp.tab")
+w7 <- w7 %>%
+  select(pidp, g_vote6, g_age_dv)
+```
+
+Joining Data
+
+```{r}
+wide <- w1 %>%
+  left_join(w2, by="pidp") %>%
+  left_join(w3, by="pidp") %>%
+  left_join(w4, by="pidp") %>%
+  left_join(w5, by="pidp") %>%
+  left_join(w6, by="pidp") %>%
+  left_join(w7, by="pidp") 
+```
+
+Removing NA to isolate indviduals who participated in every wave
+
+```{r}
+clean_wide <- wide %>%
+  replace_with_na(replace = list(a_vote6 = c(-9, -7, -2, -1))) %>%
+  replace_with_na(replace = list(b_vote6 = c(-9, -7, -2, -1))) %>%
+  replace_with_na(replace = list(c_vote6 = c(-9, -7, -2, -1))) %>%
+  replace_with_na(replace = list(d_vote6 = c(-9, -7, -2, -1))) %>%
+  replace_with_na(replace = list(e_vote6 = c(-9, -7, -2, -1))) %>%
+  replace_with_na(replace = list(f_vote6 = c(-9, -7, -2, -1,-10))) %>%
+  replace_with_na(replace = list(g_vote6 = c(-9, -7, -2, -1))) 
+```
+
+Splitting data to form into long data
+
+Filter out variables that arent needed
+
+```{r}
+data <- clean_wide %>%
+  select(pidp, a_vote6, b_vote6, c_vote6, d_vote6, e_vote6, f_vote6, g_vote6) %>%
+  na.omit()
+``` 
+```{r}
+data2 <- clean_wide %>%
+  select(pidp, a_age_dv, b_age_dv, c_age_dv, d_age_dv, e_age_dv, f_age_dv, g_age_dv)%>%
+  na.omit()
+```
+
+Converting into long data
+
+```{r}
+long1 <- data %>%
+  gather(a_vote6:g_vote6, key = "variable", value = "value") %>%
+  separate(variable, into = c("wave", "variable"), sep = "_", extra = "merge") %>%
+  spread(key = variable, value = value)
+```
+```{r}
+long2 <- data2 %>%
+  pivot_longer(a_age_dv:g_age_dv, names_to = "variable", values_to = "value") %>%
+  separate(variable, into = c("wave", "variable", sep = "_"))%>%
+  spread(key = variable, value = value) %>%
+  select(pidp, wave, age)
+```
+
+Joining data back together
+
+```{r}
+final <- long1 %>%
+  left_join(long2, by = c("pidp", "wave"))
+```
+
+Recoding wave variable into numeric for panelr package manipulation
+Explanations for the panel r package can be found at: https://www.r-bloggers.com/2019/05/a-new-package-for-panel-data-analysis-in-r/
+
+```{r}
+final <- final %>%
+  mutate(wave_n = case_when(
+    wave == "a" ~ 1, 
+    wave == "b" ~ 2,
+    wave == "c" ~ 3,
+    wave == "d" ~ 4,
+    wave == "e" ~ 5,
+    wave == "f" ~ 6,
+    wave == "g" ~ 7,
+  ))
+```
+
+```{r}
+final <- final %>%
+  mutate(age_group = case_when(
+    age %in% 18:25 ~ "18 to 25",
+    age %in% 26:35 ~ "26 to 35",
+    age %in% 36:45 ~ "36 to 45",
+    age %in% 46:55 ~ "46 to 55",
+    age %in% 56:65 ~ "56 to 65",
+    age >= 66 ~ "66 and Over"
+  ))
+```
+
+```{r}
+table(final$age_group)
+```
+
+
+Converting data using panelr package
+```{r}
+final <- panel_data(final, id = pidp, wave = wave_n)
+```
+
+Mean change in political interest for each individual 
+
+```{r}
+final <- final %>%
+  mutate(
+    pol_var = var(vote6),
+    pol_mean = mean(vote6))
+```
+
+
+Mean of Political Interest by Age Group
+
+
+```{r}
+final %>%
+  filter(wave_n == 1)%>%
+  drop_na %>%
+  ggplot(aes(x=age_group, y=pol_mean))+
+  geom_boxplot(colour = "darkred")+ xlab("Age Group")+ ylab("Mean Political Interest")+
+   stat_summary(fun.y=mean, geom="point", shape=20, size=3, color="darkgreen", fill="red") +
+  ggtitle("Figure 1 - Mean political interest by age group")
+```
+
+
+
+Political interest variance by age group
+
+
+```{r}
+final %>%
+  filter(wave_n == 1) %>%
+  drop_na %>%
+  ggplot(aes(x=age_group, y=pol_var))+
+  geom_boxplot(colour = "darkred")+
+   stat_summary(fun.y=mean, geom="point", shape=20, size=3, color="darkgreen", fill="red") +
+  xlab("Age Group (first wave)")+
+  ylab("Variance in Political Interest")+
+  ggtitle("Figure 2 - Variance in political interest through 7 waves by age group")
+```
+
+Analysis
+
+Before the figures seen above are examined, it must be noted that following the calculations of both the mean and variance in political interest for each individual, the data was then restricted to the first wave. This means that the age of the individual is taken from the first interview that they took part in. This was decided to limit the amount of observations that would be placed in two age groups as the data spans 7 waves. Furthermore, it limits the repetition of observations from the same individuals, potentially skewing data. Moreover, this study utilises the use of the panelr package, which allowed for the variance and mean to be calculated for each of the individuals throughout the seven waves. Without this package, the variance would not take into account the waves and the cross wave identifier, creating a different output.
+
+Figure 1 studies the mean political interest of individuals who took part in all seven waves by age group. The first observation from this highlights a general increase in political interest as age increases. In turn, this allows for the first null hypothesis to be accepted. This observation identifies a broad trend, however, Figure 1 also reveals smaller patterns such as the least political interest is within the 18 to 25 age group, which is indicated by the green dot within the boxplots which is the mean of the group. This was an expected observation following the exploration of literature, this particularly applies to the work of van Deth (1989) and Glenn and Grimes (1968). The mean was determined to be a better indicator than the median which is shown by the line in the middle of the boxplot.  
+
+Secondly, Figure 1 highlights an interesting observation amongst the 56 to 65 group. Within this group there is the biggest difference between the median and mean. This indicates a large disparity within this group regarding individuals political interest. Despite this, this group had the highest interest in politics.
+
+Figure 2 examined the variance over seven waves in an individual’s political interest by age group. Firstly, it should be noted that in all age groups there was a degree of variance. This indicates that political interest does not remain stable regardless of age. However, the variance within the groups is very low, all age groups reported a mean variance of below 0.5. Secondly, the mean variance within all the groups is relatively equal. However, there is a slight increase in stability as the age groups increase, this is until the 66 and over group. This age category in fact had the highest level of variance. This means that the null hypothesis must be rejected, as the stability of political interest may increase to a certain age, in this case it is the 56 to 65 group, however after this there is indications that stability decreases. Therefore, the alternative hypothesis is accepted.
+
+Finally, it is evident in Figure 2, that regardless of the age group, there is significant outliers. This is a key point that there is going to be variation in political interest as it is extremely dependent on the individual who is being interviewed. Age can be considered as a factor of this phenomenon; however, it does not determine variation in political interest.
+
+Discussion
+
+This study utilized the Understanding Society dataset to examine the level and the variation in political interest amongst various age groups via the use of boxplots.  It was revealed that the level of political interest increased as the age of the groups increased. Furthermore, the stability of political interest increased as age increased until the 66 and over group. 
+
+The level of political interest informs political campaigns which age groups to target. Focusing campaigns on age groups with the highest political interest could lead to an increase in votes for their party. As mentioned previously, individuals who have a high political interest have a higher level of political participation. This study revealed targeting 18- to 25-year-old individuals may not have much effect as they have a lower political interest than other age groups. On the other hand, it can inform a need to diversify campaigns to target younger individual’s who do not have a high political interest.
+
+The variance in political interest showed that there is a low amount of variance throughout all age groups. Despite this, there is a small reduction in variance from as the age groups get older. This indicates that as political interest is more susceptible to change in the younger years.
+
+Limitations
+
+The first limitation within this study lies within the sample sizes of the age groups. As can be seen in the code above, the 18 to 25 group has a significantly smaller sample size of 5397 observations. It must be noted that this includes seven observations from each individual. The reduced sample size in the 18 to 25 group limited the confidence in the patterns presented and hinders the capability to compare to the other groups. 
+
+Furthermore, this analysis only studied those who participated in all seven waves of the database. It is unclear how the restriction to this condition would affect the characteristics of the sample sizes. It is possible that those who participated in all waves would have a different political interest to those who did not.
+
+Finally, the data used spanned from 2009 to 2017. The data within this period could have been affected by the election cycle. Within the UK there were general elections in 2010, 2015 and 2017. There is a possibility that political interest could have spiked during these years as individuals may feel that politics is more relevant to them at this time. Furthermore, politics would be more prevalent in media, resulting in individuals having a better understanding during these times.
+
+Conclusion
+
+The analysis within this study highlighted political interest within different age groups. It was found that political interest increases as the groups increase in age. Furthermore, stability is relatively stable across age groups but increases within 26- to 65-year-old groups. The findings from this study can be used to inform political campaigns to target certain age groups. When considering the limitations, the affects of the election cycle on political interest can be an area for future research. This can inform the study on how it may affect the results highlighted.
+
+References
+
+Best, S. J., & Krueger, B. S. (2005). Analyzing the representativeness of Internet political participation.
+Political Behavior, 27, 183–216. doi:10.1007/s11109-005-3242-y.
+
+Brady, H. E., Verba, S., & Schlozman, K. L. (1995). Beyond SES: A resource model of political participation. American Political Science Review, 89, 271–294. doi:10.2307/2082425
+
+Glenn, N. D., & Grimes, M. (1968). Aging, voting, and political interest. American Sociological Review,
+33(04), 563–575
+
+Neundorf, A., Smets, K., & Garcı´a-Albacete, G. M. (2013). Homemade citizens: The development of
+political interest during adolescence and young adulthood. Acta Politica, 48, 92–116. doi:10.1057/ap.
+2012.23.
+
+Prior, M., 2010. You’ve Either Got It or You Don’t? The Stability of Political Interest over the Life Cycle. The Journal of Politics, 72(3), pp.747-766.
+
+Russo, S. and Stattin, H., 2016. Stability and Change in Youths’ Political Interest. Social Indicators Research, 132(2), pp.643-658.
+
+Sears, D. O. (1983). The persistence of early political predispositions: The roles of attitude object and life
+stage. Review of Personality and Social Psychology, 4(1), 79–116
+
+University of Essex, Institute for Social and Economic Research. (2019). Understanding Society: Innovation Panel, Waves 1-11, 2008-2018. [data collection]. 9th Edition. UK Data Service. SN: 6849, http://doi.org/10.5255/UKDA-SN-6849-12.
+
+van Deth, J. W. (1989). Interest in politics. In M. K. Jennings & J. W. van Deth (Eds.), Continuities in
+political action: A longitudinal study of political orientations in three western democracies (pp.
+275–312). Berlin: de Gruyter
